@@ -239,4 +239,13 @@ LISTEN 0      4096         0.0.0.0:10050      0.0.0.0:*    users:(("zabbix_agent
 LISTEN 0      4096            [::]:10050         [::]:*    users:(("zabbix_agentd",pid=1154,fd=5),("zabbix_agentd",pid=1153,fd=5),("zabbix_agentd",pid=1152,fd=5),("zabbix_agentd",pid=1151,fd=5),("zabbix_agentd",pid=1150,fd=5),("zabbix_agentd",pid=1149,fd=5))
 
 ```
-Здесь тестовые изменения 
+
+
+## «Система мониторинга Zabbix. часть 2» Вознюк Ольга
+ ### Задание 1
+
+ ![alt text](./img/items_add.png)
+ 
+ ### Задание 2-3
+
+ ![alt text](./img/hosts.png)
