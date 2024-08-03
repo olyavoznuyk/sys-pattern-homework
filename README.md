@@ -249,3 +249,7 @@ LISTEN 0      4096            [::]:10050         [::]:*    users:(("zabbix_agent
  ### Задание 2-3
 
  ![alt text](./img/hosts.png)
+
+ ### Задание 4
+
+ ![alt text](./img/dashboard.png)
