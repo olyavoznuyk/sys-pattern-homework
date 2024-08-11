@@ -253,3 +253,36 @@ LISTEN 0      4096            [::]:10050         [::]:*    users:(("zabbix_agent
  ### Задание 4
 
  ![alt text](./img/dashboard.png)
+
+
+## «Кластеризация и балансировка нагрузки»
+ ### Задание 1
+
+ * конфигурационный файл haproxy
+
+ ```
+ (my-venv) user@debian:~/my-venv/bin$ cat /etc/haproxy/haproxy.cfg
+global
+	log /dev/log local0
+	user haproxy
+	group haproxy
+	daemon
+
+defaults
+	log global
+	option httplog
+	timeout connect 5000ms
+	timeout client 50000ms
+	timeout server 50000ms
+
+frontend http_front
+	bind *:8081
+	default_backend http_back
+
+backend http_back
+	balance roundrobin
+	server server1 127.0.0.1:9000 check
+	server server2 127.0.0.1:9001 check
+```  
+* перенаправление запросов на разные серверы при обращении к HAProxy.
+![alt text](./img/haproxy.png)
