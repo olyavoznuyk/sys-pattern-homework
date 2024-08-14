@@ -286,3 +286,47 @@ backend http_back
 ```  
 * перенаправление запросов на разные серверы при обращении к HAProxy.
 ![alt text](./img/haproxy.png)
+
+### Задание 2
+
+* конфиг `haproxy.cfg`
+
+```
+user@debian:~$ cat /etc/haproxy/haproxy.cfg
+global
+	log /dev/log local0
+	user haproxy
+	group haproxy
+	daemon
+
+defaults
+	log global
+	option httplog
+	timeout connect 5000ms
+	timeout client 50000ms
+	timeout server 50000ms
+
+frontend example
+	bind *:8081
+	acl ACL_example_local hdr(host) -i example.local
+	use_backend web_servers if ACL_example_local
+
+backend web_servers
+	mode http
+	balance roundrobin
+	option httpchk
+	http-check send meth GET uri /index.html
+	server server1 127.0.0.1:9000 weight 2
+	server server2 127.0.0.1:9001 weight 3
+	server server3 127.0.0.1:9002 weight 4   
+```
+
+* пример запросов с указанием `example.local`
+
+![alt text](./img/haproxy_with_example.local.png)
+
+* пример запросов без указания `example.local`
+
+![alt text](./img/haproxy_without_example.local.png)
+
+![alt text](image.png)
