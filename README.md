@@ -328,5 +328,3 @@ backend web_servers
 * пример запросов без указания `example.local`
 
 ![alt text](./img/haproxy_without_example.local.png)
-
-![alt text](image.png)
