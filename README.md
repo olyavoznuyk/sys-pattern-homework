@@ -328,3 +328,69 @@ backend web_servers
 * пример запросов без указания `example.local`
 
 ![alt text](./img/haproxy_without_example.local.png)
+
+
+
+## Резервное копирование
+### Задание1
+
+* команда rsync и результат её выполнения
+
+![alt text](./img/rsync.png)
+
+### Задание2
+ * скрипт backup
+
+```
+user@ans2:~$ cat backup.sh 
+#!/bin/bash
+
+# Задаем переменные
+SOURCE_DIR=~
+BACKUP_DIR=/tmp/backup
+LOG_FILE=/tmp/backup/backup.log
+DATE=$(date '+%Y-%m-%d %H:%M:%S')
+
+# Создаем директорию для резервных копий, если она не существует
+mkdir -p $BACKUP_DIR
+
+# Выполняем резервное копирование с rsync
+if rsync -av --exclude='.*' --checksum $SOURCE_DIR/ $BACKUP_DIR/ >> $LOG_FILE 2>&1; then
+    echo "$DATE: Backup successful" >> $LOG_FILE
+else
+    echo "$DATE: Backup failed" >> $LOG_FILE
+fi
+```
+* файл crontab
+
+```
+user@ans2:~$ crontab -l
+# Edit this file to introduce tasks to be run by cron.
+# 
+# Each task to run has to be defined through a single line
+# indicating with different fields when the task will be run
+# and what command to run for the task
+# 
+# To define the time you can provide concrete values for
+# minute (m), hour (h), day of month (dom), month (mon),
+# and day of week (dow) or use '*' in these fields (for 'any').
+# 
+# Notice that tasks will be started based on the cron's system
+# daemon's notion of time and timezones.
+# 
+# Output of the crontab jobs (including errors) is sent through
+# email to the user the crontab file belongs to (unless redirected).
+# 
+# For example, you can run a backup of all your user accounts
+# at 5 a.m every week with:
+# 0 5 * * 1 tar -zcf /var/backups/home.tgz /home/
+# 
+# For more information see the manual pages of crontab(5) and cron(8)
+# 
+# m h  dom mon dow   command
+54 10 * * * /bin/bash ~/backup.sh
+```
+* результат работы утилиты
+![alt text](./img/crontab.png)
+
+
