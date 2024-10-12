@@ -1055,3 +1055,46 @@ SELECT LOWER(REPLACE(first_name, 'LL', 'pp')) AS first_name, LOWER(last_name) AS
 | keppy      | knott     |
 +------------+-----------+
 ```
+
+
+## Домашнее задание к занятию «SQL. Часть 2»
+### Задание 1.
+
+> Одним запросом получите информацию о магазине, в котором обслуживается более 300 покупателей, и выведите в результат следующую информацию:
+> фамилия и имя сотрудника из этого магазина;
+> город нахождения магазина;
+> количество пользователей, закреплённых в этом магазине.
+
+```
+SELECT s.first_name AS staff_first_name, s.last_name AS staff_last_name, c.city AS store_city, COUNT(cu.customer_id) AS customer_count FROM store st JOIN staff s ON st.store_id = s.store_id JOIN address a ON st.address_id = a.address_id JOIN city c ON a.city_id = c.city_id JOIN customer cu ON st.store_id = cu.store_id GROUP BY st.store_id, s.first_name, s.last_name, c.city HAVING COUNT(cu.customer_id) > 300;
++------------------+-----------------+------------+----------------+
+| staff_first_name | staff_last_name | store_city | customer_count |
++------------------+-----------------+------------+----------------+
+| Mike             | Hillyer         | Lethbridge |            326 |
++------------------+-----------------+------------+----------------+
+```
+
+### Задание 2.
+
+> Получите количество фильмов, продолжительность которых больше средней продолжительности всех фильмов.
+
+```
+SELECT COUNT(*) AS film_count FROM film WHERE length > (SELECT AVG(length) FROM film);
++------------+
+| film_count |
++------------+
+|        489 |
++------------+
+```
+### Задание 3.
+
+> Получите информацию, за какой месяц была получена наибольшая сумма платежей, и добавьте информацию по количеству аренд за этот месяц.
+
+```
+SELECT DATE_FORMAT(p.payment_date, '%Y-%m') AS payment_month, SUM(p.amount) AS total_payments, COUNT(r.rental_id) AS rental_count FROM payment p JOIN rental r ON p.rental_id = r.rental_id GROUP BY payment_month ORDER BY total_payments DESC LIMIT 1;
++---------------+----------------+--------------+
+| payment_month | total_payments | rental_count |
++---------------+----------------+--------------+
+| 2005-07       |       28368.91 |         6709 |
++---------------+----------------+--------------+
+```
