@@ -1004,7 +1004,6 @@ store            | store_id
 ```
 
 
-
 ## Домашнее задание к занятию «SQL. Часть 1»
 
 ### Задание 1.
@@ -1947,3 +1946,305 @@ mysql> select distinct concat(c.last_name, ' ', c.first_name), sum(p.amount) ove
 391 rows in set (0.03 sec)
 ```
 > Снижаем избыточное использование оконных функций, упрощаем структуру и добавляем индекс
+
+
+
+## Домашнее задание к занятию «Уязвимости и атаки на информационные системы»
+### Задание 1.
+
+```
+➜  ~ sudo nmap -sV -O 192.168.0.216
+[sudo] password for olya: 
+Starting Nmap 7.94SVN ( https://nmap.org ) at 2024-11-04 19:18 MSK
+Nmap scan report for 192.168.0.216
+Host is up (0.00049s latency).
+Not shown: 977 closed tcp ports (reset)
+PORT     STATE SERVICE     VERSION
+21/tcp   open  ftp         vsftpd 2.3.4
+22/tcp   open  ssh         OpenSSH 4.7p1 Debian 8ubuntu1 (protocol 2.0)
+23/tcp   open  telnet      Linux telnetd
+25/tcp   open  smtp        Postfix smtpd
+53/tcp   open  domain      ISC BIND 9.4.2
+80/tcp   open  http        Apache httpd 2.2.8 ((Ubuntu) DAV/2)
+111/tcp  open  rpcbind     2 (RPC #100000)
+139/tcp  open  netbios-ssn Samba smbd 3.X - 4.X (workgroup: WORKGROUP)
+445/tcp  open  netbios-ssn Samba smbd 3.X - 4.X (workgroup: WORKGROUP)
+512/tcp  open  exec        netkit-rsh rexecd
+513/tcp  open  login       OpenBSD or Solaris rlogind
+514/tcp  open  tcpwrapped
+1099/tcp open  java-rmi    GNU Classpath grmiregistry
+1524/tcp open  bindshell   Metasploitable root shell
+2049/tcp open  nfs         2-4 (RPC #100003)
+2121/tcp open  ftp         ProFTPD 1.3.1
+3306/tcp open  mysql       MySQL 5.0.51a-3ubuntu5
+5432/tcp open  postgresql  PostgreSQL DB 8.3.0 - 8.3.7
+5900/tcp open  vnc         VNC (protocol 3.3)
+6000/tcp open  X11         (access denied)
+6667/tcp open  irc         UnrealIRCd
+8009/tcp open  ajp13       Apache Jserv (Protocol v1.3)
+8180/tcp open  http        Apache Tomcat/Coyote JSP engine 1.1
+MAC Address: 08:00:27:2C:68:2C (Oracle VirtualBox virtual NIC)
+Device type: general purpose
+Running: Linux 2.6.X
+OS CPE: cpe:/o:linux:linux_kernel:2.6
+OS details: Linux 2.6.9 - 2.6.33
+Network Distance: 1 hop
+Service Info: Hosts:  metasploitable.localdomain, irc.Metasploitable.LAN; OSs: Unix, Linux; CPE: cpe:/o:linux:linux_kernel
+
+OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 12.83 seconds
+```
+Какие сетевые службы в ней разрешены?
+
+```
+FTP (vsftpd 2.3.4)
+SSH (OpenSSH 4.7p1)
+Telnet (Linux telnetd)
+SMTP (Postfix smtpd)
+DNS (ISC BIND 9.4.2)
+HTTP (Apache httpd 2.2.8)
+RPC (rpcbind 2)
+NetBIOS (Samba smbd 3.X - 4.X)
+Exec (netkit-rsh rexecd)
+Java RMI (GNU Classpath grmiregistry)
+Bind Shell (Metasploitable root shell)
+NFS (2-4)
+FTP (ProFTPD 1.3.1)
+MySQL (MySQL 5.0.51a)
+PostgreSQL (PostgreSQL 8.3.0 - 8.3.7)
+VNC (protocol 3.3)
+X11 (access denied)
+IRC (UnrealIRCd)
+AJP (Apache Jserv Protocol v1.3)
+HTTP (Apache Tomcat/Coyote JSP engine 1.1)
+```
+
+Какие уязвимости были вами обнаружены? 
+
+
+[vsftpd 2.3.4 - Backdoor Command Execution](https://www.exploit-db.com/exploits/49757)
+
+[BIND 9.4.1 < 9.4.2 - Remote DNS Cache Poisoning (Metasploit)](https://www.exploit-db.com/exploits/6122)
+
+[RPCBind / libtirpc - Denial of Service](https://www.exploit-db.com/exploits/41974)
+
+### Задание 2.
+
+**SYN-сканирование**
+
+```
+➜  ~ sudo nmap -sS 192.168.0.216
+Starting Nmap 7.94SVN ( https://nmap.org ) at 2024-11-04 20:09 MSK
+Nmap scan report for 192.168.0.216
+Host is up (0.000025s latency).
+Not shown: 977 closed tcp ports (reset)
+PORT     STATE SERVICE
+21/tcp   open  ftp
+22/tcp   open  ssh
+23/tcp   open  telnet
+25/tcp   open  smtp
+53/tcp   open  domain
+80/tcp   open  http
+111/tcp  open  rpcbind
+139/tcp  open  netbios-ssn
+445/tcp  open  microsoft-ds
+512/tcp  open  exec
+513/tcp  open  login
+514/tcp  open  shell
+1099/tcp open  rmiregistry
+1524/tcp open  ingreslock
+2049/tcp open  nfs
+2121/tcp open  ccproxy-ftp
+3306/tcp open  mysql
+5432/tcp open  postgresql
+5900/tcp open  vnc
+6000/tcp open  X11
+6667/tcp open  irc
+8009/tcp open  ajp13
+8180/tcp open  unknown
+MAC Address: 08:00:27:2C:68:2C (Oracle VirtualBox virtual NIC)
+
+Nmap done: 1 IP address (1 host up) scanned in 0.23 seconds
+```
+- Если порт открыт, сервер отвечает SYN-ACK.
+
+- Если порт закрыт, сервер отвечает RST.
+
+- Если порт фильтруется, ответа может не быть.
+
+```
+➜  ~ sudo nmap -sF 192.168.0.216
+Starting Nmap 7.94SVN ( https://nmap.org ) at 2024-11-04 20:11 MSK
+Nmap scan report for 192.168.0.216
+Host is up (0.00037s latency).
+Not shown: 977 closed tcp ports (reset)
+PORT     STATE         SERVICE
+21/tcp   open|filtered ftp
+22/tcp   open|filtered ssh
+23/tcp   open|filtered telnet
+25/tcp   open|filtered smtp
+53/tcp   open|filtered domain
+80/tcp   open|filtered http
+111/tcp  open|filtered rpcbind
+139/tcp  open|filtered netbios-ssn
+445/tcp  open|filtered microsoft-ds
+512/tcp  open|filtered exec
+513/tcp  open|filtered login
+514/tcp  open|filtered shell
+1099/tcp open|filtered rmiregistry
+1524/tcp open|filtered ingreslock
+2049/tcp open|filtered nfs
+2121/tcp open|filtered ccproxy-ftp
+3306/tcp open|filtered mysql
+5432/tcp open|filtered postgresql
+5900/tcp open|filtered vnc
+6000/tcp open|filtered X11
+6667/tcp open|filtered irc
+8009/tcp open|filtered ajp13
+8180/tcp open|filtered unknown
+MAC Address: 08:00:27:2C:68:2C (Oracle VirtualBox virtual NIC)
+
+Nmap done: 1 IP address (1 host up) scanned in 1.44 seconds
+```
+
+- Если порт закрыт, сервер отвечает RST.
+
+- Если порт открыт или фильтруется, ответа не будет.
+
+- Данное сканирование может обходить некоторые фильтры и брандмауэры.
+
+```
+➜  ~ sudo nmap -sX 192.168.0.216
+Starting Nmap 7.94SVN ( https://nmap.org ) at 2024-11-04 20:26 MSK
+Nmap scan report for 192.168.0.216
+Host is up (0.00032s latency).
+Not shown: 977 closed tcp ports (reset)
+PORT     STATE         SERVICE
+21/tcp   open|filtered ftp
+22/tcp   open|filtered ssh
+23/tcp   open|filtered telnet
+25/tcp   open|filtered smtp
+53/tcp   open|filtered domain
+80/tcp   open|filtered http
+111/tcp  open|filtered rpcbind
+139/tcp  open|filtered netbios-ssn
+445/tcp  open|filtered microsoft-ds
+512/tcp  open|filtered exec
+513/tcp  open|filtered login
+514/tcp  open|filtered shell
+1099/tcp open|filtered rmiregistry
+1524/tcp open|filtered ingreslock
+2049/tcp open|filtered nfs
+2121/tcp open|filtered ccproxy-ftp
+3306/tcp open|filtered mysql
+5432/tcp open|filtered postgresql
+5900/tcp open|filtered vnc
+6000/tcp open|filtered X11
+6667/tcp open|filtered irc
+8009/tcp open|filtered ajp13
+8180/tcp open|filtered unknown
+MAC Address: 08:00:27:2C:68:2C (Oracle VirtualBox virtual NIC)
+
+Nmap done: 1 IP address (1 host up) scanned in 1.40 seconds
+```
+- Если порт закрыт, сервер отвечает RST.
+
+- Если порт открыт или фильтруется, ответа не будет.
+
+```
+➜  ~ sudo nmap -v -sU 192.168.0.216
+Starting Nmap 7.94SVN ( https://nmap.org ) at 2024-11-04 20:37 MSK
+Initiating ARP Ping Scan at 20:37
+Scanning 192.168.0.216 [1 port]
+Completed ARP Ping Scan at 20:37, 0.06s elapsed (1 total hosts)
+Initiating Parallel DNS resolution of 1 host. at 20:37
+Completed Parallel DNS resolution of 1 host. at 20:37, 0.00s elapsed
+Initiating UDP Scan at 20:37
+Scanning 192.168.0.216 [1000 ports]
+Increasing send delay for 192.168.0.216 from 0 to 50 due to max_successful_tryno increase to 4
+Increasing send delay for 192.168.0.216 from 50 to 100 due to max_successful_tryno increase to 5
+Increasing send delay for 192.168.0.216 from 100 to 200 due to max_successful_tryno increase to 6
+Increasing send delay for 192.168.0.216 from 200 to 400 due to max_successful_tryno increase to 7
+Increasing send delay for 192.168.0.216 from 400 to 800 due to max_successful_tryno increase to 8
+UDP Scan Timing: About 4.37% done; ETC: 20:48 (0:11:18 remaining)
+Increasing send delay for 192.168.0.216 from 800 to 1000 due to 11 out of 23 dropped probes since last increase.
+UDP Scan Timing: About 7.29% done; ETC: 20:51 (0:12:56 remaining)
+UDP Scan Timing: About 9.19% done; ETC: 20:53 (0:14:59 remaining)
+Discovered open port 2049/udp on 192.168.0.216
+UDP Scan Timing: About 14.59% done; ETC: 20:53 (0:14:09 remaining)
+UDP Scan Timing: About 23.19% done; ETC: 20:54 (0:13:18 remaining)
+UDP Scan Timing: About 28.19% done; ETC: 20:54 (0:12:24 remaining)
+Discovered open port 53/udp on 192.168.0.216
+UDP Scan Timing: About 32.99% done; ETC: 20:54 (0:11:31 remaining)
+UDP Scan Timing: About 37.79% done; ETC: 20:54 (0:10:39 remaining)
+Discovered open port 137/udp on 192.168.0.216
+UDP Scan Timing: About 42.89% done; ETC: 20:54 (0:09:45 remaining)
+UDP Scan Timing: About 47.99% done; ETC: 20:54 (0:08:51 remaining)
+UDP Scan Timing: About 53.09% done; ETC: 20:54 (0:07:58 remaining)
+UDP Scan Timing: About 58.19% done; ETC: 20:54 (0:07:05 remaining)
+UDP Scan Timing: About 63.79% done; ETC: 20:54 (0:06:14 remaining)
+UDP Scan Timing: About 68.89% done; ETC: 20:54 (0:05:20 remaining)
+UDP Scan Timing: About 73.99% done; ETC: 20:54 (0:04:27 remaining)
+UDP Scan Timing: About 79.09% done; ETC: 20:54 (0:03:34 remaining)
+Discovered open port 111/udp on 192.168.0.216
+UDP Scan Timing: About 84.19% done; ETC: 20:54 (0:02:42 remaining)
+UDP Scan Timing: About 89.29% done; ETC: 20:54 (0:01:50 remaining)
+UDP Scan Timing: About 94.39% done; ETC: 20:54 (0:00:57 remaining)
+Completed UDP Scan at 20:54, 1028.88s elapsed (1000 total ports)
+Nmap scan report for 192.168.0.216
+Host is up (0.00056s latency).
+Not shown: 993 closed udp ports (port-unreach)
+PORT     STATE         SERVICE
+53/udp   open          domain
+68/udp   open|filtered dhcpc
+69/udp   open|filtered tftp
+111/udp  open          rpcbind
+137/udp  open          netbios-ns
+138/udp  open|filtered netbios-dgm
+2049/udp open          nfs
+MAC Address: 08:00:27:2C:68:2C (Oracle VirtualBox virtual NIC)
+
+Read data files from: /usr/bin/../share/nmap
+Nmap done: 1 IP address (1 host up) scanned in 1029.07 seconds
+           Raw packets sent: 1193 (55.731KB) | Rcvd: 1030 (76.981KB)
+```
+
+- Если порт открыт, может не быть ответа или будет специфический ответ приложения.
+
+- Если порт закрыт, сервер отвечает ICMP-пакетом "порт недоступен".
+
+- Если порт фильтруется, ответа может не быть.
+
+**Как отвечает сервер?**
+
+*SYN-сканирование*
+
+Открытый порт - Ответ SYN-ACK
+
+Закрытый порт - Ответ RST
+
+Фильтруемый порт - Без ответа
+
+*FIN-сканирование*
+
+Открытый порт - Без ответа
+
+Закрытый порт - Ответ RST
+
+Фильтруемый порт - Без ответа
+
+*Xmas-сканирование*
+
+Открытый порт - Без ответа
+
+Закрытый порт - Ответ RST
+
+Фильтруемый порт - Без ответа
+
+*UDP-сканирование*
+
+Открытый порт - В основном без ответа
+
+Закрытый порт - Ответ ICMP
+
+Фильтруемый порт - Без ответа
